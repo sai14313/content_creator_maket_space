@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BackendStatus from "./components/BackendStatus";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -23,6 +24,7 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
+      <BackendStatus />
       <Navbar />
       <main className="flex-1">
         <Routes>

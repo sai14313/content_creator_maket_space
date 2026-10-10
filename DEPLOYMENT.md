@@ -93,6 +93,26 @@ git push -u origin main
    - **Value:** `https://<your-render-url>`  (backend URL from Part 2)
 4. **Deploy**. Vercel gives a URL like `https://creatorai.vercel.app`.
 
+### Alternative: Deploy the frontend on Netlify
+
+The included `netlify.toml` (in `creatorai/frontend/`) configures the build,
+SPA routing and asset caching, so no `vercel.json` equivalent is needed.
+
+1. Go to <https://app.netlify.com> → **Add new site** → **Import an existing project**.
+2. Connect GitHub and select the **creatorai** repo.
+3. **Base directory:** `creatorai/frontend`  ← important (the app is in this subfolder).
+   - Build command: `npm run build`, Publish directory: `dist`
+     (both are already set in `netlify.toml`).
+4. **Environment variables** (Site configuration → Build & deploy → Environment):
+   - **Key:** `VITE_API_URL`
+   - **Value:** `https://<your-render-url>`  (backend URL from Part 2, **https**, no trailing slash)
+   > If `VITE_API_URL` is missing, the app falls back to `http://127.0.0.1:8000`
+   > and every login/API call fails with **“Failed to fetch”** (nothing is running
+   > on the visitor's machine, and the browser blocks it as mixed content).
+5. **Deploy**. Netlify gives a URL like `https://creatorai.netlify.app`.
+   The `netlify.toml` SPA redirect makes deep links (`/login`, `/brand`, refresh) work.
+
+
 ---
 
 ## Part 4 — Connect the two (CORS)

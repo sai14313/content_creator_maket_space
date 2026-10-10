@@ -46,6 +46,24 @@ async function parseError(res: Response): Promise<string> {
   }
 }
 
+const NETWORK_ERROR =
+  "Cannot reach the CreatorAI server (network error). " +
+  "Check your internet connection. If you run this site, make sure the backend " +
+  "is deployed and VITE_API_URL points to it, and that the backend's " +
+  "CORS_ORIGINS includes this site's domain.";
+
+/** fetch() that converts network-level failures into a helpful ApiError. */
+async function safeFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    // fetch() only rejects on network-level failures (offline, DNS, CORS
+    // preflight blocked, or mixed-content http on an https page). Surface a
+    // clear message instead of the browser's generic "Failed to fetch".
+    throw new ApiError(0, NETWORK_ERROR);
+  }
+}
+
 interface RequestOptions {
   method?: string;
   body?: unknown;
@@ -60,7 +78,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   if (token) headers.Authorization = `Bearer ${token}`;
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await safeFetch(`${API_BASE}${path}`, {
     method: options.method ?? "GET",
     headers,
     body: options.formData
@@ -86,7 +104,7 @@ export async function uploadFile<T>(
   const headers: Record<string, string> = {};
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await safeFetch(`${API_BASE}${path}`, {
     method: "POST",
     headers,
     body: formData,
