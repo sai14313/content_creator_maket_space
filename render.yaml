@@ -14,12 +14,9 @@ services:
     runtime: python
     rootDir: creatorai/backend
     plan: starter
-    # Build the frontend, then install backend deps. The built app is copied
-    # into backend/static so FastAPI can serve it (see main.py).
-    buildCommand: >-
-      cd ../frontend && npm ci && npm run build &&
-      cd ../backend && mkdir -p static && cp -r ../frontend/dist/. static/ &&
-      pip install -r requirements.txt
+    # Build the frontend and copy it into backend/static (see build.sh).
+    # Runs from Root Directory creatorai/backend, so it can call ./build.sh.
+    buildCommand: "bash build.sh"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/health
     envVars:
