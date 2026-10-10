@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ServerCrash, X } from "lucide-react";
-import { API_BASE } from "../lib/api";
+import { API_BASE, checkBackendHealth } from "../lib/api";
 
 type Health = "checking" | "ok" | "error";
 
@@ -8,10 +8,6 @@ type Health = "checking" | "ok" | "error";
  * Startup connectivity check. Pings the backend health endpoint and, if it is
  * unreachable, shows an actionable banner instead of leaving the user with a
  * cryptic "Failed to fetch" in the console.
- *
- * The usual cause in production is a missing/incorrect VITE_API_URL (the app
- * then falls back to http://127.0.0.1:8000, which only works locally) or a
- * backend whose CORS_ORIGINS does not include this site's domain.
  */
 export default function BackendStatus() {
   const [health, setHealth] = useState<Health>("checking");
@@ -22,9 +18,9 @@ export default function BackendStatus() {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
 
-    fetch(`${API_BASE}/api/health`, { signal: controller.signal })
-      .then((res) => {
-        if (!cancelled) setHealth(res.ok ? "ok" : "error");
+    checkBackendHealth(controller.signal)
+      .then((healthy) => {
+        if (!cancelled) setHealth(healthy ? "ok" : "error");
       })
       .catch(() => {
         if (!cancelled) setHealth("error");
