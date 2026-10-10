@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 import models
@@ -134,4 +134,32 @@ else:
         f"[startup] WARNING: frontend not found at {_STATIC_DIR} — running API-only. "
         "If this is production, set the Render Build Command to 'bash build.sh'."
     )
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def frontend_not_built(full_path: str):
+        # The API works, but the React app was not built into static/ during
+        # deploy. Return a clear HTML page instead of a bare 404 so the cause
+        # is obvious in the browser.
+        html = (
+            "<!doctype html><html><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            "<title>CreatorAI — backend running, frontend not built</title>"
+            "<style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;"
+            "display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;padding:24px}"
+            ".card{max-width:640px;background:#1e293b;border:1px solid #334155;border-radius:16px;padding:32px}"
+            "h1{color:#a78bfa;margin:0 0 8px}p{line-height:1.6;color:#cbd5e1}"
+            "code{background:#0f172a;padding:2px 6px;border-radius:6px;color:#93c5fd}"
+            ".ok{color:#34d399;font-weight:600}</style></head><body><div class='card'>"
+            "<h1>Backend is running ✅</h1>"
+            "<p>The API is live (<code>/api/health</code> returns <span class='ok'>ok</span>), "
+            "but the <strong>frontend was not built</strong> into the <code>static/</code> folder during deploy.</p>"
+            "<p><strong>Fix (in Render → your service → Settings → Build &amp; Deploy):</strong></p>"
+            "<p>Set <strong>Build Command</strong> to <code>bash build.sh</code> "
+            "(and <strong>Root Directory</strong> to <code>creatorai/backend</code>), "
+            "then <strong>Manual Deploy → Deploy latest commit</strong>.</p>"
+            "<p>The build log should show <code>==&gt; [1/3] Building frontend</code> … "
+            "<code>==&gt; Build complete</code>. If it doesn't, the build command isn't running build.sh.</p>"
+            "</div></body></html>"
+        )
+        return HTMLResponse(content=html, status_code=200)
 
