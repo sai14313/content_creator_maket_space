@@ -11,7 +11,7 @@ import type { AuthResponse } from "./types";
 // - Local `vite dev`: the dev server proxies /api to 127.0.0.1:8000
 //   (see vite.config.ts), so "" also works there.
 export const API_BASE =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+  ((import.meta.env.VITE_API_URL as string | undefined) ?? "").trim().replace(/\/+$/, "");
 
 const TOKEN_KEY = "creatorai_token";
 const USER_KEY = "creatorai_user";
@@ -81,6 +81,33 @@ interface RequestOptions {
   raw?: boolean;
 }
 
+async function readApiResponse<T>(res: Response): Promise<T> {
+  if (res.status === 204) return undefined as T;
+  const contentType = res.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase();
+  if (contentType !== "application/json" && !contentType?.endsWith("+json")) {
+    throw new ApiError(
+      res.ok ? 502 : res.status,
+      "The server returned a page instead of API data. The backend connection is not configured correctly. Please contact the site owner."
+    );
+  }
+  if (!res.ok) throw new ApiError(res.status, await parseError(res));
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new ApiError(502, "The server returned invalid data. Please try again later.");
+  }
+}
+
+export async function checkBackendHealth(signal?: AbortSignal): Promise<boolean> {
+  const res = await safeFetch(`${API_BASE}/api/health`, {
+    signal,
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await readApiResponse<{ status?: string; service?: string } | null>(res);
+  return data?.status === "ok" && data?.service === "creatorai-api";
+}
+
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = {};
   const token = getToken();
@@ -97,12 +124,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
         : undefined,
   });
 
-  if (!res.ok) {
-    if (res.status === 401 && token) clearSession();
-    throw new ApiError(res.status, await parseError(res));
-  }
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+  if (res.status === 401 && token) clearSession();
+  return readApiResponse<T>(res);
 }
 
 /** Multipart upload helper (deliverables). */
@@ -118,8 +141,8 @@ export async function uploadFile<T>(
     headers,
     body: formData,
   });
-  if (!res.ok) throw new ApiError(res.status, await parseError(res));
-  return (await res.json()) as T;
+  if (res.status === 401 && token) clearSession();
+  return readApiResponse<T>(res);
 }
 
 /** Absolute URL for a stored deliverable file. */
