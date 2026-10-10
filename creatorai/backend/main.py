@@ -10,6 +10,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import models
 from database import Base, engine
@@ -98,3 +100,28 @@ def health():
             )
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Serve the built frontend (single-service deployment).
+#
+# When the React app is built (`npm run build`) its output is copied into
+# `backend/static/`. This app then serves it at the SAME origin as the API, so
+# there is one deploy, one URL, and no CORS / VITE_API_URL needed. If `static/`
+# is absent (API-only local dev) this block is skipped and only the API runs.
+#
+# API routes, /docs and /openapi.json are registered earlier, so they are
+# matched before this catch-all; everything else returns index.html so
+# react-router deep links (/login, /brand, refresh) work.
+# ---------------------------------------------------------------------------
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(_STATIC_DIR):
+    _assets_dir = os.path.join(_STATIC_DIR, "assets")
+    if os.path.isdir(_assets_dir):
+        app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_spa(full_path: str):
+        return FileResponse(os.path.join(_STATIC_DIR, "index.html"))
+

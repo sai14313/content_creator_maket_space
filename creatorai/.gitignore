@@ -9,6 +9,10 @@ backend/creatorai.db
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Built frontend copied into the backend for single-service deploys
+# (render.yaml build step). This is generated output — do not commit it.
+backend/static/
+
 # Node
 node_modules/
 dist/

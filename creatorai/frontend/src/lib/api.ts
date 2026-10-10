@@ -1,8 +1,17 @@
 // Fetch API wrapper for the CreatorAI backend.
 import type { AuthResponse } from "./types";
 
+// Base URL for the CreatorAI backend.
+//
+// - Single-service deploy (FastAPI serves the built frontend on Render): leave
+//   VITE_API_URL unset. API_BASE is "" so requests are same-origin (/api/...),
+//   which means no CORS configuration is needed.
+// - Split deploy (frontend on Netlify/Vercel, backend separate): set
+//   VITE_API_URL to the backend's HTTPS URL.
+// - Local `vite dev`: the dev server proxies /api to 127.0.0.1:8000
+//   (see vite.config.ts), so "" also works there.
 export const API_BASE =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://127.0.0.1:8000";
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 const TOKEN_KEY = "creatorai_token";
 const USER_KEY = "creatorai_user";

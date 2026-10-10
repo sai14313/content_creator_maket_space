@@ -40,6 +40,11 @@ export default function BackendStatus() {
 
   if (health !== "error" || dismissed) return null;
 
+  // When API_BASE is "" (single-service same-origin deploy) show the actual
+  // origin so the user knows exactly where requests are going.
+  const effectiveUrl =
+    API_BASE || (typeof window !== "undefined" ? window.location.origin : "");
+
   return (
     <div className="border-b border-amber-200 bg-amber-50 px-4 py-3">
       <div className="mx-auto flex max-w-5xl items-start gap-3">
@@ -49,24 +54,25 @@ export default function BackendStatus() {
           <p className="mt-1">
             The app is trying to call{" "}
             <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs">
-              {API_BASE}
+              {effectiveUrl}
             </code>
             . Logins and data will not load until this is fixed.
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-800">
             <li>
-              If you own this site: set the build env var{" "}
-              <span className="font-mono text-xs">VITE_API_URL</span> to your
-              backend's HTTPS URL (no trailing slash), then redeploy.
+              If you own this site: confirm the backend is deployed and running,
+              then redeploy so the built frontend is served alongside the API.
             </li>
             <li>
-              On the backend, add this site's domain to{" "}
-              <span className="font-mono text-xs">CORS_ORIGINS</span>.
+              For a split deploy (separate frontend/backend), set the build env
+              var <span className="font-mono text-xs">VITE_API_URL</span> to your
+              backend's HTTPS URL (no trailing slash) and add this site's domain
+              to the backend's <span className="font-mono text-xs">CORS_ORIGINS</span>.
             </li>
             <li>
               Confirm the backend is running: open{" "}
-              <span className="font-mono text-xs">{API_BASE}/api/health</span> in
-              a new tab.
+              <span className="font-mono text-xs">{effectiveUrl}/api/health</span>{" "}
+              in a new tab.
             </li>
           </ul>
         </div>

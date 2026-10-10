@@ -1,18 +1,25 @@
 # Render Blueprint for the CreatorAI backend.
 #
-# Deploy: In Render → New → Blueprint → pick your GitHub repo. Render reads this
-# file automatically. It creates a Web Service with a Persistent Disk so the
-# SQLite database and uploaded files survive restarts and redeploys.
+# SINGLE-SERVICE DEPLOY (recommended): the build compiles the React frontend and
+# copies it into creatorai/backend/static, which FastAPI serves at the same
+# origin as the API. Result: ONE deploy, ONE URL, and NO CORS / VITE_API_URL
+# setup. Deploy via Render → New → Blueprint → pick your GitHub repo.
 #
-# IMPORTANT: A Persistent Disk requires a PAID instance (plan: starter, ~$7/mo).
-# For a $0 option, see the "Free alternative" note in DEPLOYMENT.md (Neon Postgres).
+# The Persistent Disk keeps the SQLite database and uploads across restarts.
+# It requires a PAID instance (plan: starter, ~$7/mo). For a $0 option see the
+# "Free alternative" note in DEPLOYMENT.md (Neon Postgres).
 services:
   - type: web
     name: creatorai-api
     runtime: python
     rootDir: creatorai/backend
     plan: starter
-    buildCommand: "pip install -r requirements.txt"
+    # Build the frontend, then install backend deps. The built app is copied
+    # into backend/static so FastAPI can serve it (see main.py).
+    buildCommand: >-
+      cd ../frontend && npm ci && npm run build &&
+      cd ../backend && mkdir -p static && cp -r ../frontend/dist/. static/ &&
+      pip install -r requirements.txt
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/health
     envVars:
@@ -25,14 +32,19 @@ services:
         value: /data/uploads
       - key: PYTHON_VERSION
         value: "3.11.9"
-      # Auto-generated strong JWT secret (safe to commit — it is generated server-side).
+      # Node version for building the frontend during deploy.
+      - key: NODE_VERSION
+        value: "20"
+      # Auto-generated strong JWT secret (safe to commit — generated server-side).
       - key: CREATORAI_SECRET
         generateValue: true
-      # YOU MUST SET THIS in the dashboard after the frontend is deployed on Vercel.
-      # Comma-separated list of allowed origins, e.g. https://your-app.vercel.app
+      # Optional: only needed for a SPLIT deploy (frontend hosted elsewhere).
+      # For the single-service setup above this can stay empty — the frontend is
+      # served same-origin, so no CORS is required.
       - key: CORS_ORIGINS
         sync: false
     disk:
       name: creatorai-data
       mountPath: /data
       sizeGB: 1
+
