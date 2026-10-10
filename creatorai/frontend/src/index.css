@@ -1,0 +1,61 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-slate-800 antialiased;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700 focus:ring-violet-500;
+  }
+  .btn-secondary {
+    @apply btn border border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:text-violet-700 focus:ring-violet-300;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-300;
+  }
+  .btn-danger {
+    @apply btn border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus:ring-rose-300;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-violet-100 bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700;
+  }
+  .chip-slate {
+    @apply inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .section-title {
+    @apply text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl;
+  }
+}
+
+/* Subtle animated gradient for hero backgrounds */
+.hero-gradient {
+  background: radial-gradient(1000px 400px at 15% 0%, rgba(139, 92, 246, 0.16), transparent 60%),
+    radial-gradient(900px 420px at 85% 10%, rgba(79, 70, 229, 0.14), transparent 55%),
+    radial-gradient(700px 380px at 50% 90%, rgba(236, 72, 153, 0.08), transparent 60%);
+}

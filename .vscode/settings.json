@@ -1,0 +1,30 @@
+{
+  // Pin the Python extension/Pylance to the backend virtual environment so
+  // imports like `import jwt` (PyJWT) resolve. Without this, Pylance falls
+  // back to the global interpreter, which lacks the packages in
+  // creatorai/backend/requirements.txt and reports unresolved imports.
+  "python.defaultInterpreterPath": "${workspaceFolder}/creatorai/backend/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  // The built-in CSS language service does not recognize Tailwind CSS
+  // at-rules like @apply / @layer and flags them as "Unknown at rule".
+  // Ignore unknown at-rules so Tailwind directives in .css files don't
+  // produce false-positive warnings. The Tailwind CSS IntelliSense
+  // extension (recommended in extensions.json) provides real support.
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  // Vercel's documentation uses "https://openapi.vercel.sh/vercel.json" as the
+  // $schema for vercel.json so editors can validate and autocomplete it. That
+  // host is not in the JSON language service's default allow-list
+  // (json.schemaDownload.trustedDomains only pre-trusts schemastore.org,
+  // json-schema.org, spec.openapis.org, ...), so creatorai/frontend/vercel.json
+  // reported:
+  //   Unable to load schema from 'https://openapi.vercel.sh/vercel.json':
+  //   Location https://openapi.vercel.sh/vercel.json is untrusted.
+  // Object settings are merged key-by-key across scopes, so listing only this
+  // host here keeps the built-in trusted domains intact while enabling
+  // completions and validation for vercel.json without the warning.
+  "json.schemaDownload.trustedDomains": {
+    "https://openapi.vercel.sh/": true
+  }
+}

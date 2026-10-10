@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Database & uploads (demo data is recreated by seed.py)
+backend/creatorai.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Node
+node_modules/
+dist/
+*.local
+
+# Logs / temp
+*.log
+npm-debug.log*
+# Environment files — never commit real secrets. Keep .env.example only.
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+!.env.example
+test_state.json
+r1.txt
+r2.txt
+r3.txt
+final_results.txt
+tsc.txt
+tails.txt
+tails2.txt
+bounds.txt
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
