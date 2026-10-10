@@ -116,7 +116,7 @@ def health():
 # ---------------------------------------------------------------------------
 _STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
-if os.path.isdir(_STATIC_DIR):
+if os.path.isdir(_STATIC_DIR) and os.path.isfile(os.path.join(_STATIC_DIR, "index.html")):
     _assets_dir = os.path.join(_STATIC_DIR, "assets")
     if os.path.isdir(_assets_dir):
         app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
@@ -124,4 +124,14 @@ if os.path.isdir(_STATIC_DIR):
     @app.get("/{full_path:path}", include_in_schema=False)
     def serve_spa(full_path: str):
         return FileResponse(os.path.join(_STATIC_DIR, "index.html"))
+
+    print(f"[startup] Serving frontend from {_STATIC_DIR}")
+else:
+    # API-only mode. In production this means the build step did not populate
+    # static/, so the SPA returns {"detail":"Not Found"}. Check that the Render
+    # Build Command is 'bash build.sh' (Root Directory: creatorai/backend).
+    print(
+        f"[startup] WARNING: frontend not found at {_STATIC_DIR} — running API-only. "
+        "If this is production, set the Render Build Command to 'bash build.sh'."
+    )
 
