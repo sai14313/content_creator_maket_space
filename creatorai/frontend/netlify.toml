@@ -2,16 +2,25 @@
 #
 # In Netlify, set the "Base directory" to `creatorai/frontend` (the app lives in
 # this subfolder). The build command and publish dir below are relative to it.
-#
-# IMPORTANT: also add the environment variable VITE_API_URL pointing at your
-# deployed backend (Render, etc.), e.g. https://creatorai-api.onrender.com
-# If VITE_API_URL is not set, api.ts falls back to http://127.0.0.1:8000, which
-# only works locally — on Netlify that makes every API call (login, etc.) fail
-# with "Failed to fetch".
 
 [build]
   command = "npm run build"
   publish = "dist"
+
+# Build-time environment variables (set the SAME value in the Netlify dashboard
+# under Site configuration → Build & deploy → Environment):
+#
+#   VITE_API_URL=https://creatorai-api.onrender.com   (your backend URL, no trailing slash)
+#
+# If VITE_API_URL is not set at build time, api.ts falls back to http://127.0.0.1:8000
+# which only works locally — on Netlify that makes every API call (login, etc.) fail
+# with "Failed to fetch".
+#
+# Note: vite.config.ts proxies /api during local dev, so "" works there too.
+# See src/lib/api.ts for details.
+
+[build.environment]
+  NODE_VERSION = "20"
 
 # SPA fallback: serve index.html for all routes so client-side routing
 # (react-router) works on refresh / deep links like /login, /brand, /creator.

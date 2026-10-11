@@ -5,8 +5,16 @@ FastAPI application: CORS for the Vite dev/prod origins, SQLAlchemy (SQLite by
 default, Postgres via DATABASE_URL), JWT auth, Swagger docs at /docs.
 """
 import os
+import sys
 import warnings
 from contextlib import asynccontextmanager
+
+# Ensure the backend directory is on sys.path so "import models",
+# "from database import ...", and "from routers import ..." work
+# regardless of the current working directory.
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

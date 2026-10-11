@@ -1,4 +1,4 @@
-# Render Blueprint for the CreatorAI backend.
+# Render Blueprint for the CreatorAI app.
 #
 # SINGLE-SERVICE DEPLOY (recommended): the build compiles the React frontend and
 # copies it into creatorai/backend/static, which FastAPI serves at the same
@@ -12,12 +12,10 @@ services:
   - type: web
     name: creatorai-api
     runtime: python
-    rootDir: creatorai/backend
     plan: starter
-    # Build the frontend and copy it into backend/static (see build.sh).
-    # Runs from Root Directory creatorai/backend, so it can call ./build.sh.
-    buildCommand: "bash build.sh"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    # Keep the service rooted at the repository so both commands use explicit paths.
+    buildCommand: "bash creatorai/backend/build.sh"
+    startCommand: "cd creatorai/backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/health
     envVars:
       - key: CREATORAI_ENV
@@ -35,13 +33,19 @@ services:
       # Auto-generated strong JWT secret (safe to commit — generated server-side).
       - key: CREATORAI_SECRET
         generateValue: true
-      # Optional: only needed for a SPLIT deploy (frontend hosted elsewhere).
-      # For the single-service setup above this can stay empty — the frontend is
-      # served same-origin, so no CORS is required.
+      # SPLIT-DEPLOY ONLY: Required when the frontend is hosted on a different
+      # domain than the backend. Add your frontend's origin(s) here (no trailing
+      # slash). Example for Netlify:
+      #
+      #   https://your-app.netlify.app
+      #   https://your-app.vercel.app
+      #
+      # If you are using the SINGLE-SERVICE setup (frontend served by the same
+      # backend), leave this empty — no CORS is required.
       - key: CORS_ORIGINS
         sync: false
+        value: "https://embed-6aca86fde9e15d34f6fff859--ai-content-market-place.netlify.app"
     disk:
       name: creatorai-data
       mountPath: /data
       sizeGB: 1
-
