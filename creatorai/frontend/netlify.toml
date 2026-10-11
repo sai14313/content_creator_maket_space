@@ -2,6 +2,12 @@
 #
 # In Netlify, set the "Base directory" to `creatorai/frontend` (the app lives in
 # this subfolder). The build command and publish dir below are relative to it.
+#
+# IMPORTANT: also add the environment variable VITE_API_URL pointing at your
+# deployed backend (Render, etc.), e.g. https://creatorai-api.onrender.com
+# If VITE_API_URL is not set, api.ts falls back to http://127.0.0.1:8000, which
+# only works locally — on Netlify that makes every API call (login, etc.) fail
+# with "Failed to fetch".
 
 [build]
   command = "npm run build"
